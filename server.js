@@ -11,8 +11,6 @@ app.get("/", (req, res) => {
 });
 const users = {};
 io.on("connection", (socket) => {
-  //   console.log("👾 New socket connected! >>", socket.id);
-
   // handles new connection
   socket.on("new user-joined", (name) => {
     // captures event when new clients join
@@ -34,7 +32,7 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", (message) => {
     // broadcast message to all sockets except the one that triggered the event
-    socket.broadcast.emit("left", users[socket.id]);; 
+    socket.broadcast.emit("left", users[socket.id]);
     delete users[socket.id];
   });
 });
