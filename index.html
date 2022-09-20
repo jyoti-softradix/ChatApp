@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat App</title>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/3.1.1/socket.io.js"
+      integrity="sha512-oFOCo2/3DtjrJG4N27BjSLQWoiBv171sK6a+JiWjp/7agxC2nCUP358AqzxkBUb5jX8g6CYLPdSKQTbC0weCwA=="
+      crossorigin="anonymous"
+    ></script>
+    <!-- <script src="main.js"></script> -->
+</head>
+<style>
+    body{
+        background-image: linear-gradient( rgb(255,255,255),rgb(98, 50, 129));
+        height: 100vh;
+    }
+   img{
+        display: block;
+        margin: auto;
+        width: 50px;
+        height: 50px;
+    }
+    h1{
+        font-size: 30px;
+        margin-top: 12px;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        text-align: center;
+    }
+    .container{
+        max-width: 950px;
+        height: 58vh;
+        margin: auto;
+        border-radius: 8px;
+        border: 2px solid black;
+        padding: 33px;
+        margin-bottom: 23px;
+        overflow-y: scroll;
+    }
+    .user-join{
+        font-size: 0.9rem;
+        color: black;
+        background-color: ivory;
+        border-radius: 25px;
+        width: max-content;
+        padding: 3px 6px;
+        margin: 0 auto;
+        margin-bottom: 15px;
+    }
+    .message{
+        background-color: ivory;
+        width: 24%;
+        padding: 10px;
+        margin: 17px 2px;
+        border: 2px solid black;
+        border-radius: 6px;
+    }
+    #send-container{
+        display: block;
+        margin: auto;
+        text-align: center;
+        max-width: 980px;
+        width: 100%;
+    }
+    #messageInput{
+        width: 90%;
+        height: 33px;
+        border: 2px solid black;
+        border-radius: 6px;
+    }
+    .btn{
+        cursor: pointer;
+        border: 2px solid black;
+        border-radius: 6px;
+        height: 34px;
+    }
+    .left{
+        float: left;
+        clear: both;
+    }
+    .right{
+        float: right;
+        clear: both;
+    }
+</style>
+
+<body>
+    <nav>
+        <img src="download.jpeg" alt="">
+        <h1>Welcome to iChat App</h1>
+      
+    </nav>
+    <div class="container">
+        <div class="user-join">
+            <p><b>Jyoti </b> joined the chat</p> 
+        </div> 
+    </div>
+    <div class="send">
+        <form action="#" id= "send-container">
+            <input class="input center" type="text" id="messageInput"/>
+            <button class="btn" type="submit">Send!</button>
+        </form>
+    </div>
+</body>
+
+<script>
+const socket = io.connect();
+const messageContainer = document.querySelector(".container");
+
+const audio= new Audio("samsung.mp3");
+
+const append = (message, position) => {
+  const messageElement = document.createElement("div");
+  messageElement.innerHTML = message;
+  messageElement.classList.add("message");
+  messageElement.classList.add(position);
+  messageContainer.append(messageElement);
+  if(position=='left'){
+  audio.play();
+  }
+}
+
+const form = document.getElementById("send-container");
+form.addEventListener("submit", (e)=>{
+    e.preventDefault();
+    const messageInput = document.getElementById("messageInput");
+    const message= messageInput.value;
+    append(`You: ${message}`, "right");
+    socket.emit("send", message)
+    messageInput.value="";
+
+})
+
+const name = prompt("Welcome! Please enter your name:");
+socket.emit("new user-joined",  name );
+
+socket.on("user-joined", (socket_name) =>{
+userJoinLeft(socket_name,'joined');
+});
+
+function userJoinLeft(name,status){
+const div= document.createElement("div");
+div.classList.add('user-join');
+const content=`<p><b> ${name}</b> ${status} the chat</p>`;
+div.innerHTML=content;
+messageContainer.appendChild(div);
+}
+
+socket.on("receive", (data) =>{
+append(`${data.name}:${data.message}`,"left");
+});
+
+socket.on("left", name =>{
+userJoinLeft(name,'left');
+});
+
+</script>
+</html>
